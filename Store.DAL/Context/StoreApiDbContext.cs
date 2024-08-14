@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Store.DAL.Entities;
-using Store.DAL.Entities.Base;
+using Store.Core.Entities;
+using Store.Core.Entities.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
