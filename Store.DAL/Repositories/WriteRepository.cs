@@ -23,6 +23,20 @@ namespace Store.DAL.Repositories
             return entityEntry.State == EntityState.Added;
         }
 
+        public async Task<bool> AddBulkAsync(IEnumerable<T> entities)
+        {
+            await Table.AddRangeAsync(entities);
+
+            // Check if all entities are in the Added state
+            var allAdded = entities.All(entity =>
+            {
+                var entry = _context.Entry(entity);
+                return entry.State == EntityState.Added;
+            });
+
+            return allAdded;
+        }
+
         public bool Delete(T entity)
         {
             var entityEntry = Table.Remove(entity);
@@ -34,7 +48,13 @@ namespace Store.DAL.Repositories
         {
             Table.RemoveRange(entities);
 
-            return true;
+            var allDeleted = entities.All(entity =>
+            {
+                var entry = _context.Entry(entity);
+                return entry.State == EntityState.Deleted;
+            });
+
+            return allDeleted;
         }
 
         public bool DeleteSoft(T entity)
