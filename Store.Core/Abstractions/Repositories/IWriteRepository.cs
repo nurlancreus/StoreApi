@@ -10,6 +10,7 @@ namespace Store.Core.Abstractions.Repositories
     public interface IWriteRepository<T> : IRepository<T> where T : BaseEntity
     {
         Task<bool> AddAsync(T entity);
+        Task<bool> AddBulkAsync(IEnumerable<T> entities);
         bool Update(T entity);
         bool Delete(T entity);
         bool DeleteSoft(T entity);

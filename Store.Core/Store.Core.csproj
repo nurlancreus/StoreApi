@@ -11,8 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Abstractions\Repositories\Category\" />
-    <Folder Include="Abstractions\Services\" />
+    <ProjectReference Include="..\Store.DTO\Store.DTO.csproj" />
   </ItemGroup>
 
 </Project>
