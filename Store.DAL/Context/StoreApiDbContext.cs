@@ -12,6 +12,8 @@ namespace Store.DAL.Context
 {
     public class StoreApiDbContext(DbContextOptions<StoreApiDbContext> contextOptions) : DbContext(contextOptions)
     {
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Category> Categories { get; set; }
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             var changedEntities = ChangeTracker
@@ -53,9 +55,6 @@ namespace Store.DAL.Context
 
             base.OnModelCreating(modelBuilder);
         }
-
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Category> Categories { get; set; }
 
         private static LambdaExpression GetIsDeletedFilter(Type entityType)
         {
