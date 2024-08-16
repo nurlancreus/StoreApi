@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Store.Core.Abstractions.Repositories;
+using Store.Core.Abstractions.Services;
 using Store.Core.Entities;
+using Store.DTO.DTOs.Category;
+using System.Net;
 
 namespace Store.API.Controllers
 {
@@ -9,101 +13,46 @@ namespace Store.API.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly ICategoryReadRepository _readRepository;
-        private readonly ICategoryWriteRepository _writeRepository;
+        private readonly ICategoryService _service;
 
-        public CategoriesController(ICategoryReadRepository readRepository, ICategoryWriteRepository writeRepository)
+        public CategoriesController(ICategoryService service)
         {
-            _readRepository = readRepository;
-            _writeRepository = writeRepository;
+            _service = service;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            List<Category> categories = await _readRepository.GetAll(false).ToListAsync();
-
-            return Ok(categories);
+            var response = await _service.GetAllAsync();
+            return StatusCode((int)response.StatusCode);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
-            Category? category = await _readRepository.GetByIdAsync(id, false);
-
-            if (category == null)
-            {
-                return NotFound(category);
-            }
-
-            return Ok(category);
+            var response = await _service.GetByIdAsync(id);
+            return StatusCode((int)response.StatusCode);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Category postedCategory)
+        public async Task<IActionResult> Post([FromBody] CategoryPostDTO postedCategory)
         {
-            bool isAdded = await _writeRepository.AddAsync(postedCategory);
-
-            if (isAdded)
-            {
-                await _writeRepository.SaveChangesAsync();
-                return Created();
-            }
-            else
-            {
-                return BadRequest();
-            }
+           var response = await _service.CreateAsync(postedCategory);
+            return StatusCode((int)response.StatusCode);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] Category updatedCategory)
+        public async Task<IActionResult> Put(string id, [FromBody] CategoryPostDTO updatedCategory)
         {
-            Category? category = await _readRepository.GetByIdAsync(id);
-
-            if (category == null)
-            {
-                return NotFound(category);
-            }
-
-            category.Name = updatedCategory.Name;
-            bool isUpdated = _writeRepository.Update(category);
-
-            if (isUpdated)
-            {
-                await _writeRepository.SaveChangesAsync();
-                return Ok();
-            }
-            else
-            {
-                return BadRequest();
-            }
+           var response = await _service.UpdateAsync(id, updatedCategory);
+            return StatusCode((int)response.StatusCode);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id, [FromQuery] bool soft = false)
+        public async Task<IActionResult> Delete(string id, [FromQuery] bool soft = true)
         {
-            Category? category = await _readRepository.GetByIdAsync(id);
-
-            if (category == null)
-            {
-                return NotFound(category);
-            }
-
-            bool isDeleted = soft switch
-            {
-                false => _writeRepository.Delete(category),
-                true => _writeRepository.DeleteSoft(category),
-            };
-
-            if (isDeleted)
-            {
-                await _writeRepository.SaveChangesAsync();
-                return NoContent();
-            }
-            else
-            {
-                return BadRequest();
-            }
+            var response = await _service.DeleteAsync(id, soft);
+            return StatusCode((int)response.StatusCode);
         }
     }
 }
