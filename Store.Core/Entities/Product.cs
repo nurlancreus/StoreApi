@@ -13,7 +13,7 @@ namespace Store.Core.Entities
         public string Description { get; set; }
         public double Price { get; set; }
         public int Stock {  get; set; }
-        public Guid CategoryId { get; set; }
-        public Category Category { get; set; }
+        public ICollection<Category> Categories { get; set; } = [];
+        public ICollection<ProductImageFile> ProductImageFiles { get; set; } = [];
     }
 }
