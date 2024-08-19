@@ -17,14 +17,18 @@ namespace Store.BLL.Services
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ICategoryReadRepository _readRepository;
-        private readonly ICategoryWriteRepository _writeRepository;
+        private readonly ICategoryReadRepository _categoryReadRepository;
+        private readonly ICategoryWriteRepository _categoryWriteRepository;
+        private readonly IProductReadRepository _productReadRepository;
+        private readonly IProductWriteRepository _productWriteRepository;
         private readonly IMapper _mapper;
 
-        public CategoryService(ICategoryReadRepository readRepository, ICategoryWriteRepository writeRepository, IMapper mapper)
+        public CategoryService(ICategoryReadRepository categoryReadRepository, ICategoryWriteRepository categoryWriteRepository, IProductReadRepository productReadRepository, IProductWriteRepository productWriteRepository, IMapper mapper)
         {
-            _readRepository = readRepository;
-            _writeRepository = writeRepository;
+            _categoryReadRepository = categoryReadRepository;
+            _categoryWriteRepository = categoryWriteRepository;
+            _productReadRepository = productReadRepository;
+            _productWriteRepository = productWriteRepository;
             _mapper = mapper;
         }
 
@@ -32,11 +36,11 @@ namespace Store.BLL.Services
         {
             Category category = _mapper.Map<Category>(postedCategory);
 
-            bool isAdded = await _writeRepository.AddAsync(category);
+            bool isAdded = await _categoryWriteRepository.AddAsync(category);
 
             if (isAdded)
             {
-                await _writeRepository.SaveChangesAsync();
+                await _categoryWriteRepository.SaveChangesAsync();
                 return new ApiResponse(HttpStatusCode.Created);
             }
             else
@@ -47,7 +51,7 @@ namespace Store.BLL.Services
 
         public async Task<ApiResponse> DeleteAsync(string id, bool soft = true)
         {
-            Category? category = await _readRepository.GetByIdAsync(id);
+            Category? category = await _categoryReadRepository.GetByIdAsync(id);
 
             if (category == null)
             {
@@ -55,12 +59,12 @@ namespace Store.BLL.Services
             }
 
             bool isDeleted = soft
-                ? _writeRepository.DeleteSoft(category)
-                : _writeRepository.Delete(category);
+                ? _categoryWriteRepository.DeleteSoft(category)
+                : _categoryWriteRepository.Delete(category);
 
             if (isDeleted)
             {
-                await _writeRepository.SaveChangesAsync();
+                await _categoryWriteRepository.SaveChangesAsync();
                 return new ApiResponse(HttpStatusCode.NoContent);
             }
             else
@@ -71,7 +75,7 @@ namespace Store.BLL.Services
 
         public async Task<ApiResponseWithData<ICollection<CategoryGetDTO>>> GetAllAsync()
         {
-            var query = _readRepository.GetAll(false);
+            var query = _categoryReadRepository.GetAll(false).Include(c => c.Products).ThenInclude(p => p.ProductImageFiles);
 
             List<Category> categories = await query.ToListAsync();
 
@@ -83,11 +87,21 @@ namespace Store.BLL.Services
         public async Task<ApiResponseWithData<CategoryGetDTO>> GetByIdAsync(string id)
         {
 
-            Category? category = await _readRepository.GetByIdAsync(id, false);
+            Category? category = await _categoryReadRepository.GetByIdAsync(id, false);
 
             if (category == null)
             {
                 return new ApiResponseWithData<CategoryGetDTO>(HttpStatusCode.NotFound, null);
+            }
+
+            await _categoryReadRepository.Table.Entry(category).Collection(c => c.Products).LoadAsync();
+
+            // For each product, explicitly load the associated ProductImages
+            foreach (var product in category.Products)
+            {
+                await _productReadRepository.Table.Entry(product)
+                    .Collection(p => p.ProductImageFiles)
+                    .LoadAsync();
             }
 
             CategoryGetDTO categoryGetDTO = _mapper.Map<CategoryGetDTO>(category);
@@ -97,7 +111,7 @@ namespace Store.BLL.Services
 
         public async Task<ApiResponse> UpdateAsync(string id, CategoryPostDTO updatedCategory)
         {
-            Category? category = await _readRepository.GetByIdAsync(id);
+            Category? category = await _categoryReadRepository.GetByIdAsync(id);
 
             if (category == null)
             {
@@ -105,11 +119,11 @@ namespace Store.BLL.Services
             }
 
             category.Name = updatedCategory.Name;
-            bool isUpdated = _writeRepository.Update(category);
+            bool isUpdated = _categoryWriteRepository.Update(category);
 
             if (isUpdated)
             {
-                await _writeRepository.SaveChangesAsync();
+                await _categoryWriteRepository.SaveChangesAsync();
                 return new ApiResponse(HttpStatusCode.OK);
             }
             else
