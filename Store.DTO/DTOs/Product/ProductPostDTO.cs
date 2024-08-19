@@ -1,4 +1,6 @@
-﻿using Store.DTO.DTOs.Category;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
+using Store.DTO.DTOs.Category;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +15,7 @@ namespace Store.DTO.DTOs.Product
         public string Description { get; set; }
         public double Price { get; set; }
         public int Stock { get; set; }
-        public Guid CategoryId { get; set; }
-    }
+        public ICollection<CategoryPostDTO> Categories { get; set; } 
+        public IFormFileCollection FormFiles { get; set; }
+}
 }
