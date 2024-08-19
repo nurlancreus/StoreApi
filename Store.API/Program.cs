@@ -1,5 +1,6 @@
 
 using Store.BLL;
+using Store.Core.Enums;
 using Store.DAL;
 
 namespace Store.API
@@ -16,6 +17,8 @@ namespace Store.API
             // Custom Services
             builder.Services.AddDALServices(builder.Configuration);
             builder.Services.AddBLLServices(builder.Configuration);
+
+            builder.Services.AddStorage(StorageType.Local, builder.Configuration);
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
