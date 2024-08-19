@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Store.DAL.Context;
 
@@ -11,9 +12,11 @@ using Store.DAL.Context;
 namespace Store.DAL.Migrations
 {
     [DbContext(typeof(StoreApiDbContext))]
-    partial class StoreApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240819133322_mig_6_adding_storage_column_into_appfiles")]
+    partial class mig_6_adding_storage_column_into_appfiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

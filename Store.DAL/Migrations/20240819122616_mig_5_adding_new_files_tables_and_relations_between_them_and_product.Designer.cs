@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Store.DAL.Context;
 
@@ -11,9 +12,11 @@ using Store.DAL.Context;
 namespace Store.DAL.Migrations
 {
     [DbContext(typeof(StoreApiDbContext))]
-    partial class StoreApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240819122616_mig_5_adding_new_files_tables_and_relations_between_them_and_product")]
+    partial class mig_5_adding_new_files_tables_and_relations_between_them_and_product
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,10 +63,6 @@ namespace Store.DAL.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Storage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");

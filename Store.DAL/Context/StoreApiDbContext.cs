@@ -14,6 +14,8 @@ namespace Store.DAL.Context
     {
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<AppFile> AppFiles { get; set; }
+        public DbSet<ProductImageFile> ProductImageFiles { get; set; }
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             var changedEntities = ChangeTracker
@@ -44,12 +46,24 @@ namespace Store.DAL.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder
+            .Entity<AppFile>()
+            .Property(p => p.Storage)
+            .HasConversion<string>();
+
             // Apply global query filter for soft delete
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
-                if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+                // Get the entity type's CLR type
+                var clrType = entityType.ClrType;
+
+                // Check if it's a root entity (not derived) and implements BaseEntity
+                if (typeof(BaseEntity).IsAssignableFrom(clrType) &&
+                    entityType.BaseType == null &&
+                    clrType.GetProperty("IsDeleted") != null)
                 {
-                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(GetIsDeletedFilter(entityType.ClrType));
+                    // Apply the IsDeleted filter
+                    modelBuilder.Entity(clrType).HasQueryFilter(GetIsDeletedFilter(clrType));
                 }
             }
 
@@ -64,5 +78,6 @@ namespace Store.DAL.Context
 
             return Expression.Lambda(condition, param);
         }
+
     }
 }
