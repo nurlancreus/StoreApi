@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Store.BLL.Services.Helpers
+namespace Store.BLL.Helpers
 {
     public static class FileHelpers
     {

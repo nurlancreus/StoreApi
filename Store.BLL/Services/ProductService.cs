@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Store.Core.Abstractions.Repositories;
 using Store.Core.Abstractions.Services;
+using Store.Core.Abstractions.Services.Storage;
 using Store.Core.Entities;
 using Store.Core.Responses;
 using Store.DTO.DTOs.Product;
@@ -18,23 +20,55 @@ namespace Store.BLL.Services
     {
         private readonly IProductReadRepository _productReadRepository;
         private readonly IProductWriteRepository _productWriteRepository;
+        private readonly IStorageService _storageService;
+        private readonly IProductImageFileWriteRepository _productImageFileWriteRepository;
         private readonly IMapper _mapper;
 
-        public ProductService(IProductReadRepository productReadRepository, IProductWriteRepository productWriteRepository, IMapper mapper)
+        public ProductService(IProductReadRepository productReadRepository, IProductWriteRepository productWriteRepository, IMapper mapper, IStorageService storageService, IProductImageFileWriteRepository productImageFileWriteRepository)
         {
             _productReadRepository = productReadRepository;
             _productWriteRepository = productWriteRepository;
             _mapper = mapper;
+            _storageService = storageService;
+            _productImageFileWriteRepository = productImageFileWriteRepository;
         }
 
         public async Task<ApiResponse> CreateAsync(ProductPostDTO postedProduct)
         {
             Product product = _mapper.Map<Product>(postedProduct);
 
-            bool isAdded = await _productWriteRepository.AddAsync(product);
-
-            if (isAdded)
+            if (postedProduct.FormFiles.Count > 0)
             {
+                try
+                {
+
+                    var results = await _storageService.UploadAsync("product-images", postedProduct.FormFiles);
+
+                    int counter = 0;
+
+                    var productImages = await Task.WhenAll(results.Select(async result =>
+                    {
+                        counter++;
+
+                        return new ProductImageFile()
+                        {
+                            IsMain = counter == 1,
+                            FileName = Path.GetFileNameWithoutExtension(result.fileName),
+                            Extension = Path.GetExtension(result.fileName),
+                            Product = product,
+                            ImageUrl = await _storageService.GetUploadedFileUrlAsync(result.path, result.fileName)
+                        };
+                    }));
+
+                    product.ProductImageFiles = productImages;
+                }
+                catch
+                {
+                    return new ApiResponse(HttpStatusCode.BadRequest, "Error happened while uploading files.");
+                }
+
+
+                bool isAdded = await _productWriteRepository.AddAsync(product);
                 await _productWriteRepository.SaveChangesAsync();
                 return new ApiResponse(HttpStatusCode.Created);
             }
@@ -53,9 +87,35 @@ namespace Store.BLL.Services
                 return new ApiResponse(HttpStatusCode.NotFound);
             }
 
-            bool isDeleted = soft
-                ? _productWriteRepository.DeleteSoft(product)
-                : _productWriteRepository.Delete(product);
+
+
+            bool isDeleted;
+
+            if (soft)
+            {
+                isDeleted = _productWriteRepository.DeleteSoft(product);
+
+                if (isDeleted)
+                {
+                    foreach (var image in product.ProductImageFiles)
+                    {
+                        _productImageFileWriteRepository.DeleteSoft(image);
+                    }
+                }
+            }
+            else
+            {
+
+                isDeleted = _productWriteRepository.Delete(product);
+                if (isDeleted)
+                {
+                    foreach (var image in product.ProductImageFiles)
+                    {
+                        _productImageFileWriteRepository.Delete(image);
+                        await _storageService.DeleteByUrlAsync(image.ImageUrl);
+                    }
+                }
+            }
 
             if (isDeleted)
             {
