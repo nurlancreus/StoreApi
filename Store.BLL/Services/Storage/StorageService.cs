@@ -28,29 +28,39 @@ namespace Store.BLL.Services.Storage
             }
         }
 
-        public Task DeleteAllAsync(string path)
+        public async Task DeleteAllAsync(string path)
         {
-            throw new NotImplementedException();
+            await _storage.DeleteAllAsync(path);
         }
 
-        public Task DeleteAsync(string path, string fileName)
+        public async Task DeleteAsync(string path, string fileName)
         {
-            throw new NotImplementedException();
+            await _storage.DeleteAsync(path, fileName);
         }
 
-        public Task<List<string>> GetFilesAsync(string path)
+        public async Task DeleteByUrlAsync(string url)
         {
-            throw new NotImplementedException();
+            await _storage.DeleteByUrlAsync(url);
         }
 
-        public Task<bool> HasFileAsync(string path, string fileName)
+        public async Task<List<string>> GetFilesAsync(string path)
         {
-            throw new NotImplementedException();
+            return await _storage.GetFilesAsync(path);
+        }
+
+        public async Task<string> GetUploadedFileUrlAsync(string path, string fileName)
+        {
+            return await _storage.GetUploadedFileUrlAsync(path, fileName);
+        }
+
+        public async Task<bool> HasFileAsync(string path, string fileName)
+        {
+            return await _storage.HasFileAsync(path, fileName);
         }
 
         public Task<List<(string fileName, string path)>> UploadAsync(string path, IFormFileCollection formFiles)
         {
-            throw new NotImplementedException();
+            return _storage.UploadAsync(path, formFiles);
         }
     }
 }

@@ -3,6 +3,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Store.BLL.Services;
+using Store.BLL.Services.Storage;
 using Store.BLL.Services.Storage.AWS;
 using Store.BLL.Services.Storage.Local;
 using Store.Core.Abstractions.Services;
@@ -25,6 +26,8 @@ namespace Store.BLL
             services.AddAutoMapper(typeof(ServiceRegistration).Assembly);
 
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IStorageService, StorageService>();
         }
 
         public static void AddStorage(this IServiceCollection services, StorageType storageType, IConfiguration configuration)
