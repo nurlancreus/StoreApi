@@ -18,7 +18,7 @@ namespace Store.API
             builder.Services.AddDALServices(builder.Configuration);
             builder.Services.AddBLLServices(builder.Configuration);
 
-            builder.Services.AddStorage(StorageType.Local, builder.Configuration);
+            builder.Services.AddStorage(StorageType.AWS, builder.Configuration);
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
