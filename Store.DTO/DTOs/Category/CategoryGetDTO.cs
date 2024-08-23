@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Store.DTO.DTOs.Category
 {
-    public class CategoryGetDTO
+    public record CategoryGetDTO
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

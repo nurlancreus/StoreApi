@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Store.DTO.DTOs.ProductImageFile
 {
-    public class ProductImageFilePostDTO
+    public record ProductImageFilePostDTO
     {
         public string Name { get; set; }
         public bool IsMain { get; set; }

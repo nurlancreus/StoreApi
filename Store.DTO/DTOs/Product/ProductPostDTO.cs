@@ -9,13 +9,14 @@ using System.Threading.Tasks;
 
 namespace Store.DTO.DTOs.Product
 {
-    public class ProductPostDTO
+    public record ProductPostDTO
     {
         public string Name { get; set; }
         public string Description { get; set; }
         public double Price { get; set; }
         public int Stock { get; set; }
         public ICollection<CategoryPostDTO> Categories { get; set; } = [];
-        public IFormFileCollection FormFiles { get; set; } = new FormFileCollection();
+
+        public IFormFileCollection? FormFiles { get; set; }
 }
 }

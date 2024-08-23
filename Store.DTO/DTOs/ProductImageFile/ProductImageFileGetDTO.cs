@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Store.DTO.DTOs.ProductImageFile
 {
-    public class ProductImageFileGetDTO
+    public record ProductImageFileGetDTO
     {
         public string Name { get; set; }
         public string ImageUrl { get; set; }

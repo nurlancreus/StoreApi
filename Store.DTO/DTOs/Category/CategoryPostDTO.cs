@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Store.DTO.DTOs.Category
 {
-    public class CategoryPostDTO
+    public record CategoryPostDTO
     {
         public string Name { get; set; }
     }
