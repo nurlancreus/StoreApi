@@ -133,24 +133,62 @@ namespace Store.BLL.Services.Storage.AWS
             return uploadedFiles;
         }
 
-        public Task<string> GetUploadedFileUrlAsync(string path, string fileName)
+        public async Task<string> GetUploadedFileUrlAsync(string path, string fileName)
         {
             string objectKey = Path.Combine(path, fileName).Replace("\\", "/");
-            // Set the presigned URL request
-            var request = new GetPreSignedUrlRequest
+
+            var request = new PutACLRequest
             {
                 BucketName = _bucketName,
                 Key = objectKey,
+                CannedACL = S3CannedACL.PublicRead // Set ACL to public-read
             };
 
+
+            await _s3Client.PutACLAsync(request);
+            Console.WriteLine($"The object is now publicly accessible: ");
+
+
             // Generate the URL
-            string url = _s3Client.GetPreSignedURL(request);
-            return Task.FromResult(url);
+            string url = $"https://{_bucketName}.s3.{_s3Client.Config.RegionEndpoint.SystemName}.amazonaws.com/{objectKey}";
+
+            return url;
         }
 
-        public Task DeleteByUrlAsync(string url)
+        public async Task DeleteByUrlAsync(string url)
         {
-            throw new NotImplementedException();
+            // Extract bucket name and object key from the URL
+            var uri = new Uri(url);
+            string bucketName = uri.Host.Split('.')[0]; // Gets 'my-store-api-bucket' from the URL
+            string objectKey = uri.AbsolutePath.TrimStart('/'); // Gets 'product-images/profile-photo-3.jpg' from the URL
+
+            // Call the method to delete the object
+            await DeleteObjectFromS3(objectKey);
+        }
+
+        private async Task DeleteObjectFromS3(string objectKey)
+        {
+            try
+            {
+                // Create the DeleteObjectRequest
+                var deleteObjectRequest = new DeleteObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = objectKey
+                };
+
+                // Delete the object
+                await _s3Client.DeleteObjectAsync(deleteObjectRequest);
+                Console.WriteLine($"Successfully deleted object '{objectKey}' from bucket '{_bucketName}'.");
+            }
+            catch (AmazonS3Exception e)
+            {
+                Console.WriteLine($"Error deleting object: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Unknown error: {e.Message}");
+            }
         }
     }
 }

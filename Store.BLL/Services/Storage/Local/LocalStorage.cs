@@ -97,12 +97,18 @@ namespace Store.BLL.Services.Storage.Local
 
         public Task<string> GetUploadedFileUrlAsync(string path, string fileName)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(Path.Combine(path, fileName));
         }
 
         public Task DeleteByUrlAsync(string url)
         {
-            throw new NotImplementedException();
+            return Task.Run(() =>
+             {
+                 if (File.Exists(url))
+                 {
+                     File.Delete(url);
+                 }
+             });
         }
     }
 }

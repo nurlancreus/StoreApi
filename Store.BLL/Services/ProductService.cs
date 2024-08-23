@@ -37,11 +37,10 @@ namespace Store.BLL.Services
         {
             Product product = _mapper.Map<Product>(postedProduct);
 
-            if (postedProduct.FormFiles.Count > 0)
+            if (postedProduct.FormFiles != null)
             {
                 try
                 {
-
                     var results = await _storageService.UploadAsync("product-images", postedProduct.FormFiles);
 
                     int counter = 0;
@@ -53,29 +52,34 @@ namespace Store.BLL.Services
                         return new ProductImageFile()
                         {
                             IsMain = counter == 1,
-                            FileName = Path.GetFileNameWithoutExtension(result.fileName),
+                            FileName = result.fileName,
                             Extension = Path.GetExtension(result.fileName),
                             Product = product,
-                            ImageUrl = await _storageService.GetUploadedFileUrlAsync(result.path, result.fileName)
+                            ImageUrl = await _storageService.GetUploadedFileUrlAsync(result.path, result.fileName),
+                            Storage = _storageService.StorageName,
                         };
                     }));
 
                     product.ProductImageFiles = productImages;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    return new ApiResponse(HttpStatusCode.BadRequest, "Error happened while uploading files.");
+                    return new ApiResponse(HttpStatusCode.BadRequest, ex.Message);
                 }
+            }
 
+            bool isAdded = await _productWriteRepository.AddAsync(product);
 
-                bool isAdded = await _productWriteRepository.AddAsync(product);
+            if (isAdded)
+            {
                 await _productWriteRepository.SaveChangesAsync();
                 return new ApiResponse(HttpStatusCode.Created);
             }
             else
             {
-                return new ApiResponse(HttpStatusCode.BadRequest);
+                return new ApiResponse(HttpStatusCode.InternalServerError, "Something went wrong");
             }
+
         }
 
         public async Task<ApiResponse> DeleteAsync(string id, bool soft = true)
@@ -86,8 +90,6 @@ namespace Store.BLL.Services
             {
                 return new ApiResponse(HttpStatusCode.NotFound);
             }
-
-
 
             bool isDeleted;
 
@@ -124,7 +126,7 @@ namespace Store.BLL.Services
             }
             else
             {
-                return new ApiResponse(HttpStatusCode.BadRequest);
+                return new ApiResponse(HttpStatusCode.InternalServerError, "Something went wrong");
             }
         }
 
@@ -177,7 +179,7 @@ namespace Store.BLL.Services
             }
             else
             {
-                return new ApiResponse(HttpStatusCode.BadRequest);
+                return new ApiResponse(HttpStatusCode.InternalServerError, "Something went wrong");
             }
         }
     }
