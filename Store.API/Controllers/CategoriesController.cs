@@ -24,35 +24,38 @@ namespace Store.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var response = await _service.GetAllAsync();
-            return StatusCode((int)response.StatusCode);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
             var response = await _service.GetByIdAsync(id);
-            return StatusCode((int)response.StatusCode);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CategoryPostDTO postedCategory)
+        public async Task<IActionResult> Create([FromBody] CategoryPostDTO postedCategory)
         {
            var response = await _service.CreateAsync(postedCategory);
-            return StatusCode((int)response.StatusCode);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] CategoryPostDTO updatedCategory)
+        public async Task<IActionResult> Update(string id, [FromBody] CategoryPostDTO updatedCategory)
         {
            var response = await _service.UpdateAsync(id, updatedCategory);
-            return StatusCode((int)response.StatusCode);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id, [FromQuery] bool soft = true)
         {
             var response = await _service.DeleteAsync(id, soft);
-            return StatusCode((int)response.StatusCode);
+
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }

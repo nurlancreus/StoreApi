@@ -21,23 +21,39 @@ namespace Store.API.Controllers
         {
             var response = await _productService.GetAllAsync();
 
-            return StatusCode((int)response.StatusCode, response.Message);
+            return StatusCode((int)response.StatusCode, response);
         }
-        
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(string id)
+        {
+            var response = await _productService.GetByIdAsync(id);
+
+            return StatusCode((int)response.StatusCode, response);
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Create(ProductPostDTO productPostDTO)
+        public async Task<IActionResult> Create([FromForm] ProductPostDTO productPostDTO)
         {
             var response = await _productService.CreateAsync(productPostDTO);
 
-            return StatusCode((int)response.StatusCode, response.Message);
+            return StatusCode((int)response.StatusCode, response);
         }
-        
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
-        {
-            var response = await _productService.DeleteAsync(id, true);
 
-            return StatusCode((int)response.StatusCode, response.Message);
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody] ProductPostDTO updatedCategory)
+        {
+            var response = await _productService.UpdateAsync(id, updatedCategory);
+
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id, bool soft = true)
+        {
+            var response = await _productService.DeleteAsync(id, soft);
+
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }
