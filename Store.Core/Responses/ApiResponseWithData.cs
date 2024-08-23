@@ -11,7 +11,7 @@ namespace Store.Core.Responses
     {
         public ApiResponseWithData(HttpStatusCode code, T? data, string? message = null) : base(code, message)
         {
-            
+            Data = data;
         }
 
         public T? Data { get; set; }

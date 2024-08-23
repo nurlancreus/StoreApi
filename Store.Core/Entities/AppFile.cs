@@ -11,10 +11,10 @@ namespace Store.Core.Entities
 {
     public class AppFile : BaseEntity
     {
-        [NotMapped]
         public string FileName { get; set; }
         public string Extension { get; set; }
         public StorageType Storage {  get; set; }
+        [NotMapped]
         public override DateTime? UpdatedAt { get => base.UpdatedAt; set => base.UpdatedAt = value; }
     }
 }
